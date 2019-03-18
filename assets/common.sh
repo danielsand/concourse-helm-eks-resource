@@ -11,9 +11,12 @@ generate_awscli_kubeconfig() {
       aws_region="eu-west-1"
     fi
     echo "Assuming aws role with arn $assume_aws_role"
-    export role=$(curl http://169.254.169.254/latest/meta-data/iam/security-credentials/)
-    export temp_creds=$(curl http://169.254.169.254/latest/meta-data/iam/security-credentials/${role})
-    export AWS_ACCESS_KEY_ID=$(echo ${temp_creds} | grep AccessKeyId | awk -F: '{ print $2 }' | sed 's/[, \"]//g') AWS_SESSION_TOKEN=$(echo ${temp_cred} | grep Token | awk -F: '{ print $2 }' | sed 's/[, \"]//g') AWS_SECRET_ACCESS_KEY=$(echo ${temp_creds} | grep SecretAccessKey | awk -F: '{ print $2 }' | sed 's/[, \"]//g') AWS_DEFAULT_REGION=$aws_region
+    export role=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/)
+    export temp_creds=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role})
+    export AWS_ACCESS_KEY_ID=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role} | grep AccessKeyId | awk -F: '{ print $2 }' | sed 's/[, \"]//g') 
+    export AWS_SESSION_TOKEN=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role} | grep Token | awk -F: '{ print $2 }' | sed 's/[, \"]//g') 
+    export AWS_SECRET_ACCESS_KEY=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role} | grep SecretAccessKey | awk -F: '{ print $2 }' | sed 's/[, \"]//g') 
+    export AWS_DEFAULT_REGION=$aws_region
   fi
   local aws_eks_cluster_name
   aws_eks_cluster_name="$(jq -r '.source.aws_eks_cluster_name // ""' < "$payload")"

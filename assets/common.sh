@@ -13,10 +13,25 @@ generate_awscli_kubeconfig() {
     echo "Assuming aws role with arn $assume_aws_role"
     export role=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/)
     export temp_creds=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role})
-    export AWS_ACCESS_KEY_ID=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role} | grep AccessKeyId | awk -F: '{ print $2 }' | sed 's/[, \"]//g') 
-    export AWS_SESSION_TOKEN=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role} | grep Token | awk -F: '{ print $2 }' | sed 's/[, \"]//g') 
-    export AWS_SECRET_ACCESS_KEY=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role} | grep SecretAccessKey | awk -F: '{ print $2 }' | sed 's/[, \"]//g') 
+    export AWS_ACCESS_KEY_ID=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role} | grep AccessKeyId | awk -F: '{ print $2 }' | sed 's/[, \"]//g')
+    export AWS_SESSION_TOKEN=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role} | grep Token | awk -F: '{ print $2 }' | sed 's/[, \"]//g')
+    export AWS_SECRET_ACCESS_KEY=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${role} | grep SecretAccessKey | awk -F: '{ print $2 }' | sed 's/[, \"]//g')
     export AWS_DEFAULT_REGION=$aws_region
+    export temp_credentials=$(aws sts assume-role --role-arn $assume_aws_role --role-session-name concourse-helm-resource-session)
+    export AWS_ACCESS_KEY_ID=$(echo ${temp_credentials} | jq -r '.Credentials.AccessKeyId') AWS_SESSION_TOKEN=$(echo ${temp_credentials} | jq -r '.Credentials.SessionToken') AWS_SECRET_ACCESS_KEY=$(echo ${temp_credentials} | jq -r ' .Credentials.SecretAccessKey')
+    # keeping this for debugging purposes
+    #echo "------"
+    #echo $(aws sts assume-role --role-arn $assume_aws_role --role-session-name concourse-helm-resource-session)
+    #echo "------"
+    #echo "${temp_credentials}"
+    #echo "------"
+    #echo "AWS_ACCESS_KEY_ID"
+    #echo "${AWS_ACCESS_KEY_ID}"
+    #echo "AWS_SESSION_TOKEN"
+    #echo "${AWS_SESSION_TOKEN}"
+    #echo "AWS_SECRET_ACCESS_KEY"
+    #echo "${AWS_SECRET_ACCESS_KEY}"
+    #echo "------"
   fi
   local aws_eks_cluster_name
   aws_eks_cluster_name="$(jq -r '.source.aws_eks_cluster_name // ""' < "$payload")"

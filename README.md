@@ -2,12 +2,24 @@
 
 Deploy to [Kubernetes Helm](https://github.com/kubernetes/helm) from [Concourse](https://concourse.ci/).
 
+Changes:
+
 Forked from linkyard/concourse-helm-resource.  
 Modified to support autogeneration of kubeconfig for AWS EKS and AWS STS AssumeRole.  
 
 Quick fixed.
 
+Forked gbvanrenswoude/concourse-helm-eks-resource did some improvement on 
+
+- getting AWS credentials via IAM Role of the EKS Cluster (curl)
+
 ## Installing
+
+Make Sure you have created a propper Deployment IAM Role
+
+This will help you to understand and setup a correct AssumeRole:
+
+**https://octopus.com/blog/aws-roles**
 
 there is no Public Docker Image on Dockerhub for this, out of security concerns.
 so best way to use this by building this for your self via
@@ -20,6 +32,8 @@ docker tag concourse-helm-eks-resource:latest <YourECRRepoFQDN>/concourse-helm-e
 docker push <YourECRRepoFQDN>/concourse-helm-eks-resource:latest
 ```
 
+then modify your Concourse Pipeline yaml
+
 Add the resource type to your pipeline:
 
 ```yaml
@@ -29,6 +43,22 @@ resource_types:
   source:
     repository: <YourECRRepoFQDN>/concourse-helm-eks-resource
 ```
+
+```yaml
+  - name: helm-deployment
+    type: helm
+    source:
+      assume_aws_role: <AWSEKSAssumeRoleforCIDeploy>
+      aws_eks_cluster_name: <EKSClusterName>
+      aws_region: <AWSRegion>
+      cluster_ca: <EKSclusterCA>
+      cluster_url: <EKSclusterURL>
+      namespace: <namespace>
+      release: <releasename>
+      use_awscli_eks_auth: true
+ ```
+ 
+for more documentation on the flags also examples on EKS deployment search below
 
 ## Source Configuration
 

@@ -1,4 +1,4 @@
-# Helm Resource for Concourse
+# Helm Resource with EKS Support for Concourse
 
 Deploy to [Kubernetes Helm](https://github.com/kubernetes/helm) from [Concourse](https://concourse.ci/).
 
@@ -9,6 +9,17 @@ Quick fixed.
 
 ## Installing
 
+there is no Public Docker Image on Dockerhub for this, out of security concerns.
+so best way to use this by building this for your self via
+
+```sh
+git clone https://github.com/danielsand/concourse-helm-eks-resource.git
+cd concourse-helm-eks-resource
+docker build -t concourse-helm-eks-resource:latest . 
+docker tag concourse-helm-eks-resource:latest <YourECRRepoFQDN>/concourse-helm-eks-resource:latest
+docker push <YourECRRepoFQDN>/concourse-helm-eks-resource:latest
+```
+
 Add the resource type to your pipeline:
 
 ```yaml
@@ -16,7 +27,7 @@ resource_types:
 - name: helm
   type: docker-image
   source:
-    repository: linkyard/concourse-helm-resource
+    repository: <YourECRRepoFQDN>/concourse-helm-eks-resource
 ```
 
 ## Source Configuration

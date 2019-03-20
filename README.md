@@ -11,7 +11,7 @@ Quick fixed.
 
 Forked gbvanrenswoude/concourse-helm-eks-resource did some improvement on 
 
-- getting AWS credentials via IAM Role of the EKS Cluster (curl)
+- getting AWS credentials via IAM Role of the EKS Cluster on the respective EC2 Instance (curl)
 
 ## Installing
 
